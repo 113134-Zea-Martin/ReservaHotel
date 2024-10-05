@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 
 
@@ -21,7 +22,7 @@ public class ReservaDTO {
     private Long idReserva;
 
     @JsonProperty("id_cliente")
-    private Long idCliente;
+    private String idCliente;
 
     @JsonProperty("id_hotel")
     private Long idHotel;
@@ -31,11 +32,11 @@ public class ReservaDTO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonProperty("fecha_ingreso")
-    private Date fechaIngreso;
+    private LocalDate fechaIngreso;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonProperty("fecha_salida")
-    private Date fechaSalida;
+    private LocalDate fechaSalida;
 
     @JsonProperty("estado_reserva")
     private String estadoReserva;
