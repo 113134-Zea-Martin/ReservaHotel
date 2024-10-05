@@ -8,6 +8,7 @@ import ar.edu.utn.frc.tup.lciv.entities.ReservaEntity;
 import ar.edu.utn.frc.tup.lciv.models.Reserva;
 import ar.edu.utn.frc.tup.lciv.respositories.ReservaRepository;
 import ar.edu.utn.frc.tup.lciv.services.ReservaService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,8 +23,8 @@ import java.util.Optional;
 @Service
 public class ReservaServiceImpl implements ReservaService {
 
-    //private final String URL = "http://localhost:8080/habitacion/";
-    private final String URL = "http://java-api-hotel:8080/habitacion/";
+    private final String URL = "http://localhost:8080/habitacion/";
+    //private final String URL = "http://java-api-hotel:8080/habitacion/";
 
     @Autowired
     RestTemplate restTemplate;
@@ -36,9 +37,12 @@ public class ReservaServiceImpl implements ReservaService {
 
 
     @Override
+    @CircuitBreaker(name = "disponibilidadService", fallbackMethod = "fallbackReserva")
     public ReservaDTO createReserva(ReservaRequestPostDto reservaRequestPostDto) {
         ReservaDTO reservaDTO = new ReservaDTO();
         ReservaDTO reservaDTO1 = new ReservaDTO();
+
+        try {
 
         DisponibilidadDto disponibilidadDto = restTemplate.getForEntity(URL +
                                 "disponibilidad?hotel_id=" + reservaRequestPostDto.getIdHotel() +
@@ -98,10 +102,39 @@ public class ReservaServiceImpl implements ReservaService {
             reservaDTO1 = modelMapper.map(re, ReservaDTO.class);
 
         }
+        } catch ( Exception e) {
+            // Si ocurre algún error, manejamos el estado como PENDIENTE
+            return fallbackReserva(reservaRequestPostDto, e);
+        }
 
         return reservaDTO1;
     }
 
+    public ReservaDTO fallbackReserva(ReservaRequestPostDto reservaRequestPostDto, Throwable t) {
+        // Creamos una reserva con estado PENDIENTE
+        ReservaDTO reservaDTO = new ReservaDTO();
+        reservaDTO.setIdHotel(reservaRequestPostDto.getIdHotel());
+        reservaDTO.setIdCliente(reservaRequestPostDto.getIdCliente());
+        reservaDTO.setTipoHabitacion(reservaRequestPostDto.getTipoHabitacion());
+        reservaDTO.setFechaIngreso(reservaRequestPostDto.getFechaIngreso());
+        reservaDTO.setFechaSalida(reservaRequestPostDto.getFechaSalida());
+        reservaDTO.setEstadoReserva("PENDIENTE");
+
+        // Guardar la reserva con estado PENDIENTE
+        Reserva reserva = new Reserva();
+        reserva.setIdCliente(reservaDTO.getIdCliente());
+        reserva.setIdHotel(reservaDTO.getIdHotel());
+        reserva.setTipoHabitacion(reservaDTO.getTipoHabitacion());
+        reserva.setFechaIngreso(reservaDTO.getFechaIngreso());
+        reserva.setFechaSalida(reservaDTO.getFechaSalida());
+        reserva.setEstadoReserva("PENDIENTE");
+        reserva.setMedioPago(reservaRequestPostDto.getMedioPago());
+
+        ReservaEntity re = modelMapper.map(reserva, ReservaEntity.class);
+        reservaRepository.save(re);
+
+        return modelMapper.map(re, ReservaDTO.class);
+    }
 
     public BigDecimal determinarTemporada(LocalDate fechaDesde, LocalDate fechaHasta) {
         // Variables para verificar las temporadas

@@ -35,7 +35,7 @@ public class ReservaEntity {
     @Column(name = "estado_reserva", nullable = false)
     private String estadoReserva;
 
-    @Column(name = "precio", precision = 10, scale = 2, nullable = false)
+    @Column(name = "precio", precision = 10, scale = 2, nullable = true)
     private BigDecimal precio;
 
     @Column(name = "medio_pago")

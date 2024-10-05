@@ -146,7 +146,6 @@ class ReservaServiceImplTest {
         assertFalse(reservaService.esMesTemporadaBaja(1)); // Enero
     }
 
-    /*
     @Test
     void getReserva() {
         when(reservaRepository.findById(1L)).thenReturn(Optional.of(reservaEntity));
@@ -160,5 +159,4 @@ class ReservaServiceImplTest {
         assertEquals(reservaEntity.getIdReserva(), resultado.getIdReserva());
     }
 
-     */
 }

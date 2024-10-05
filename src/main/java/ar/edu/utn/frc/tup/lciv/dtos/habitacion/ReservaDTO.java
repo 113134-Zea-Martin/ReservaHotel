@@ -2,6 +2,7 @@ package ar.edu.utn.frc.tup.lciv.dtos.habitacion;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +17,17 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonPropertyOrder({
+        "id_reserva",
+        "id_cliente",
+        "id_hotel",
+        "tipo_habitacion",
+        "fecha_ingreso",
+        "fecha_salida",
+        "estado_reserva",
+        "precio",
+        "medio_pago"
+})
 public class ReservaDTO {
 
     @JsonProperty("id_reserva")
